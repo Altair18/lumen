@@ -1,5 +1,5 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "Gloam",
   "short_name": "Gloam",
   "description": "A dusk moth lives in your lantern. Tiny cares, stories, and a nest that stays warm.",
@@ -11,7 +11,7 @@
   "theme_color": "#4E6B56",
   "lang": "en-GB",
   "dir": "ltr",
-  "categories": ["health", "lifestyle"],
+  "categories": ["health", "lifestyle", "entertainment"],
   "icons": [
     {
       "src": "icon.svg",
@@ -29,15 +29,13 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "related_applications": [
+      "purpose": "any"
+    },
     {
-      "platform": "play",
-      "id": "app.gloam.nest",
-      "url": "https://play.google.com/store/apps/details?id=app.gloam.nest"
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "prefer_related_applications": false
+  ]
 }
