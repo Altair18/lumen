@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#4E6B56">
+<title>Lumen</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--cream:#F3EDE3;--ink:#2B2A26;--sage:#4E6B56;--dusk:#5C6A8A;--paper:#FFF9F2}
+*{box-sizing:border-box}html,body{margin:0;background:var(--cream);color:var(--ink);font-family:Georgia,serif}
+body{max-width:28rem;margin:0 auto;padding:1rem 1rem 6rem}
+button{border:0;border-radius:999px;padding:.7rem 1.1rem;background:var(--sage);color:#fff;font:inherit;cursor:pointer}
+button.ghost{background:transparent;color:var(--sage);box-shadow:inset 0 0 0 1px var(--sage)}
+.card{background:var(--paper);border-radius:1.2rem;padding:1rem;margin:.7rem 0}
+.moth{font-size:3.4rem;text-align:center}
+.goal{display:flex;gap:.7rem;padding:.55rem 0;border-bottom:1px solid #eee8dc}
+nav.tab{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(28rem,100%);background:var(--paper);display:flex;justify-content:space-around;padding:.45rem}
+nav.tab button{background:none;color:var(--dusk);font-size:.78rem}
+nav.tab button.on{color:var(--sage)}
+input,textarea{width:100%;padding:.55rem .7rem;border-radius:.7rem;border:1px solid #ddd4c6;font:inherit}
+a{color:var(--sage)}.mute{color:var(--dusk)}
+</style></head>
+<body>
+<div id="app"></div>
+<script>
+const KEY='lumen-nest-v1';
+const TITLES=['Drink a glass of water','Eat something kind','Step outside for one minute','Send one kind text','Tidy one small surface','Write one true sentence','Breathe for six slow breaths'];
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}};
+const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
+const day=()=>new Date().toISOString().slice(0,10);
+function seed(){const s=load();if(!s.goals)s.goals=TITLES.map((t,i)=>({id:'g'+i,title:t}));if(!s.done)s.done={};s.energy=s.energy||0;s.journal=s.journal||[];save(s);return s}
+let screen='today';
+function mark(id){const s=seed();const d=day();s.done[d]=s.done[d]||[];if(s.done[d].includes(id))s.done[d]=s.done[d].filter(x=>x!==id);else{s.done[d].push(id);s.energy=Math.min(3,s.energy+1)}save(s);draw()}
+function hatch(){const s=seed();s.hatched=true;s.name=(document.getElementById('nm').value||'').trim()||'Moss';save(s);draw()}
+function note(){const t=document.getElementById('j').value.trim();if(!t)return;const s=seed();s.journal.push({date:day(),text:t});save(s);draw()}
+function adventure(){const s=seed();s.energy=0;save(s);alert(s.name+' found a warm bakery window. The nest stayed lit.');draw()}
+function draw(){
+ const s=seed();const el=document.getElementById('app');
+ if(!s.hatched){el.innerHTML='<div class="card"><div class="moth">&#127769;</div><h1>A lantern is waiting.</h1><p>A small dusk moth will live here. Missed days stay warm.</p><input id="nm" placeholder="Name the moth"><p></p><button onclick="hatch()">Open the lantern</button></div>';return;}
+ const done=s.done[day()]||[];let body='';
+ if(screen==='today') body='<div class="moth">&#129714;</div><p class="mute">'+s.name+' kept the nest lit.</p><div class="card"><strong>Energy '+s.energy+'/3</strong></div><div class="card"><h2>Today</h2>'+s.goals.map(g=>'<label class="goal"><input type="checkbox" '+(done.includes(g.id)?'checked':'')+' onchange="mark(\''+g.id+'\')">'+g.title+'</label>').join('')+'</div><div class="card"><button '+(s.energy>=3?'':'disabled')+' onclick="adventure()">Send them out</button></div>';
+ else if(screen==='breathe') body='<div class="card"><h2>Breathe</h2><p>In for four. Hold for two. Out for six.</p></div>';
+ else if(screen==='aid') body='<div class="card"><h2>First aid</h2><p class="mute">Comfort, not a medical device.</p><p>Drink water. Sit down. Name five things you can see.</p><p>Crisis: US 988 · <a href="https://www.iasp.info/suicidalthoughts/">IASP</a></p></div>';
+ else if(screen==='journal') body='<div class="card"><h2>Journal</h2><textarea id="j" rows="4"></textarea><p></p><button onclick="note()">Keep this</button></div>'+(s.journal.slice(-5).reverse().map(n=>'<div class="card"><small>'+n.date+'</small><p>'+n.text+'</p></div>').join(''));
+ else body='<div class="card"><h2>Nest</h2><p>Lantern+ is extra cloth. Monthly £2.99 · yearly £24.99 on Google Play.</p><p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="support.html">Support</a></p><button class="ghost" onclick="if(confirm(\'Erase?\')){localStorage.removeItem(KEY);location.reload()}">Erase this nest</button></div>';
+ el.innerHTML=body+'<nav class="tab"><button class="'+(screen==='today'?'on':'')+'" onclick="screen=\'today\';draw()">Today</button><button class="'+(screen==='breathe'?'on':'')+'" onclick="screen=\'breathe\';draw()">Breathe</button><button class="'+(screen==='aid'?'on':'')+'" onclick="screen=\'aid\';draw()">Aid</button><button class="'+(screen==='journal'?'on':'')+'" onclick="screen=\'journal\';draw()">Journal</button><button class="'+(screen==='set'?'on':'')+'" onclick="screen=\'set\';draw()">Nest</button></nav>';
+}
+draw();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body></html>
